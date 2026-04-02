@@ -58,18 +58,9 @@ class WC_Colibrix_Gateway_Card extends WC_Colibrix_Gateway_Abstract
                 'tracking_id' => $tracking_id,
             ],
             'settings'         => [
-                'success_url' => add_query_arg(
-                    ['wc-api' => $this->get_return_api_key(), 'order_id' => $order->get_id()],
-                    home_url('/')
-                ),
-                'fail_url'    => add_query_arg(
-                    ['wc-api' => $this->get_return_api_key(), 'order_id' => $order->get_id()],
-                    home_url('/')
-                ),
-                'cancel_url'  => add_query_arg(
-                    ['wc-api' => $this->get_return_api_key(), 'order_id' => $order->get_id()],
-                    home_url('/')
-                ),
+                'success_url' => $this->build_return_url($order),
+                'fail_url'    => $this->build_return_url($order),
+                'cancel_url'  => $this->build_return_url($order),
                 'language'    => substr(get_locale(), 0, 2),
             ],
             'customer'         => [

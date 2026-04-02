@@ -57,9 +57,7 @@ class WC_Colibrix_Gateway_Apm extends WC_Colibrix_Gateway_Abstract
             'description' => sprintf('Order #%d', $order->get_id()),
             'tracking_id' => $tracking_id,
 
-            'return_url' => add_query_arg(
-                ['wc-api' => $this->get_return_api_key(), 'order_id' => $order->get_id()],
-                home_url('/')),
+            'return_url' => $this->build_return_url($order),
 
             'customer'         => [
                 'email'      => (string) $order->get_billing_email(),

@@ -7,6 +7,7 @@ abstract class WC_Colibrix_Gateway_Abstract extends WC_Payment_Gateway
     protected const META_UID = '_colibrix_gateway_uid';
     protected const META_TRACKING_ID = '_colibrix_gateway_tracking_id';
     private const DEFAULT_API_BASE = 'https://mapi.new.acq.mellifera.dev';
+    private const RETURN_TOKEN_TTL = 86400;
 
     protected string $api_base_url = self::DEFAULT_API_BASE;
     protected int $project_id = 0;
@@ -14,7 +15,7 @@ abstract class WC_Colibrix_Gateway_Abstract extends WC_Payment_Gateway
     protected string $signature_key = '';
     protected string $transaction_type = 'payment';
     protected string $test_mode = 'no';
-    protected string $debug_mode = 'yes';
+    protected string $debug_mode = 'no';
 
     abstract protected function get_gateway_id(): string;
     abstract protected function get_gateway_method_title(): string;
@@ -112,7 +113,7 @@ abstract class WC_Colibrix_Gateway_Abstract extends WC_Payment_Gateway
                 'title'       => __('Debug log', 'wc-colibrix-gateway-payment'),
                 'type'        => 'checkbox',
                 'label'       => __('Enable detailed logs to WooCommerce > Status > Logs', 'wc-colibrix-gateway-payment'),
-                'default'     => 'yes',
+                'default'     => 'no',
                 'description' => __('Log API requests/responses and callbacks.', 'wc-colibrix-gateway-payment'),
             ],
         ];
@@ -171,6 +172,8 @@ abstract class WC_Colibrix_Gateway_Abstract extends WC_Payment_Gateway
     {
         $uid      = isset($_GET['uid']) ? sanitize_text_field(wp_unslash((string) $_GET['uid'])) : '';
         $order_id = isset($_GET['order_id']) ? absint($_GET['order_id']) : 0;
+        $token    = isset($_GET['token']) ? sanitize_text_field(wp_unslash((string) $_GET['token'])) : '';
+        $expires  = isset($_GET['expires']) ? absint($_GET['expires']) : 0;
 
         if ($order_id <= 0 && $uid !== '') {
             $order = $this->find_order_by_uid($uid);
@@ -186,6 +189,11 @@ abstract class WC_Colibrix_Gateway_Abstract extends WC_Payment_Gateway
 
         $order = wc_get_order($order_id);
         if (! $order instanceof WC_Order) {
+            wp_safe_redirect(wc_get_checkout_url());
+            exit;
+        }
+
+        if (! $this->is_valid_return_request($order, $token, $expires)) {
             wp_safe_redirect(wc_get_checkout_url());
             exit;
         }
@@ -573,6 +581,43 @@ abstract class WC_Colibrix_Gateway_Abstract extends WC_Payment_Gateway
         }
 
         return substr($value, 0, 4) . str_repeat('*', $length - 8) . substr($value, -4);
+    }
+
+    protected function build_return_url(WC_Order $order): string
+    {
+        $expires = time() + self::RETURN_TOKEN_TTL;
+        $token   = $this->generate_return_token($order, $expires);
+
+        return add_query_arg(
+            [
+                'wc-api'   => $this->get_return_api_key(),
+                'order_id' => $order->get_id(),
+                'expires'  => $expires,
+                'token'    => $token,
+            ],
+            home_url('/')
+        );
+    }
+
+    protected function is_valid_return_request(WC_Order $order, string $token, int $expires): bool
+    {
+        if ($token === '' || $expires <= 0 || $expires < time()) {
+            return false;
+        }
+
+        return hash_equals($this->generate_return_token($order, $expires), $token);
+    }
+
+    protected function generate_return_token(WC_Order $order, int $expires): string
+    {
+        $payload = implode('|', [
+            (string) $order->get_id(),
+            (string) $order->get_order_key(),
+            $this->id,
+            (string) $expires,
+        ]);
+
+        return hash_hmac('sha256', $payload, $this->signature_key);
     }
 
     protected function get_request_signature(): string
