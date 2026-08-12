@@ -14,7 +14,7 @@
       settings.description || ""
     );
     const iconUrls = Array.isArray(settings.icons)
-      ? settings.icons.filter(Boolean).slice(0, 3)
+      ? settings.icons.filter(Boolean)
       : settings.icon
         ? [settings.icon]
         : [];

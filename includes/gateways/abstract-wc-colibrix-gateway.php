@@ -85,7 +85,11 @@ abstract class WC_Colibrix_Gateway_Abstract extends WC_Payment_Gateway
             'icons' => [
                 'title'       => __('Icons', 'wc-colibrix-gateway-payment'),
                 'type'        => 'icons',
-                'description' => __('Up to 3 logos shown next to the title at checkout (for example Visa, Mastercard, Amex).', 'wc-colibrix-gateway-payment'),
+                'description' => sprintf(
+                    /* translators: %d: maximum number of icons */
+                    __('Up to %d logos shown next to the title at checkout (for example Visa, Mastercard, Amex).', 'wc-colibrix-gateway-payment'),
+                    $this->get_max_icons()
+                ),
                 'default'     => '',
             ],
             'api_base_url' => [
@@ -129,6 +133,16 @@ abstract class WC_Colibrix_Gateway_Abstract extends WC_Payment_Gateway
     }
 
     /**
+     * Maximum number of checkout icons a merchant can configure.
+     */
+    public function get_max_icons(): int
+    {
+        $max = (int) apply_filters('wc_colibrix_gateway_max_icons', 10, $this->id);
+
+        return max(1, $max);
+    }
+
+    /**
      * @return list<string>
      */
     public function get_icon_urls(): array
@@ -144,7 +158,7 @@ abstract class WC_Colibrix_Gateway_Abstract extends WC_Payment_Gateway
             return esc_url_raw(trim((string) $url));
         }, $urls)));
 
-        return array_slice($urls, 0, 3);
+        return array_slice($urls, 0, $this->get_max_icons());
     }
 
     public function get_icon(): string
@@ -184,6 +198,7 @@ abstract class WC_Colibrix_Gateway_Abstract extends WC_Payment_Gateway
         );
         $urls = $this->get_icon_urls();
         $value = implode("\n", $urls);
+        $max_icons = $this->get_max_icons();
 
         ob_start();
         ?>
@@ -217,7 +232,7 @@ abstract class WC_Colibrix_Gateway_Abstract extends WC_Payment_Gateway
                         type="button"
                         class="button wc-colibrix-gateway-upload-icons"
                         data-target="<?php echo esc_attr($field_key); ?>"
-                        <?php disabled(count($urls) >= 3); ?>
+                        <?php disabled(count($urls) >= $max_icons); ?>
                     >
                         <?php esc_html_e('Add icons', 'wc-colibrix-gateway-payment'); ?>
                     </button>
@@ -239,7 +254,7 @@ abstract class WC_Colibrix_Gateway_Abstract extends WC_Payment_Gateway
     }
 
     /**
-     * Sanitize icons list on save (max 3 URLs).
+     * Sanitize icons list on save.
      *
      * @param string $key Field key.
      * @param string|null $value Submitted value.
@@ -253,7 +268,7 @@ abstract class WC_Colibrix_Gateway_Abstract extends WC_Payment_Gateway
             return esc_url_raw(trim((string) $url));
         }, $urls)));
 
-        return implode("\n", array_slice($urls, 0, 3));
+        return implode("\n", array_slice($urls, 0, $this->get_max_icons()));
     }
 
     public function enqueue_admin_assets(string $hook): void
@@ -282,7 +297,7 @@ abstract class WC_Colibrix_Gateway_Abstract extends WC_Payment_Gateway
             [
                 'title'    => __('Select payment method icons', 'wc-colibrix-gateway-payment'),
                 'button'   => __('Use selected images', 'wc-colibrix-gateway-payment'),
-                'maxIcons' => 3,
+                'maxIcons' => $this->get_max_icons(),
                 'remove'   => __('Remove icon', 'wc-colibrix-gateway-payment'),
             ]
         );

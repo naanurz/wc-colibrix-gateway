@@ -18,7 +18,7 @@ The plugin registers two payment methods:
 - supports refunds via API for the card payment method
 - supports WooCommerce HPOS
 - supports WooCommerce Cart & Checkout Blocks
-- lets merchants customize checkout title, description, and up to 3 payment method icons
+- lets merchants customize checkout title, description, and up to 10 payment method icons
 - writes debug logs for API requests and responses into WooCommerce logs
 
 ## Supported payment methods
@@ -46,7 +46,7 @@ Each payment method has the following settings:
 - `Enable/Disable`
 - `Title`
 - `Description`
-- `Icons` (up to 3 image URLs / Media Library picker shown at checkout)
+- `Icons` (up to 10 image URLs / Media Library picker shown at checkout; filterable via `wc_colibrix_gateway_max_icons`)
 - `API Base URL`
 - `Project ID`
 - `API Key`

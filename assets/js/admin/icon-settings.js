@@ -6,7 +6,7 @@
   var maxIcons =
     (window.wcColibrixGatewayIconSettings &&
       window.wcColibrixGatewayIconSettings.maxIcons) ||
-    3;
+    10;
 
   function getUrls($input) {
     return $.trim($input.val())
