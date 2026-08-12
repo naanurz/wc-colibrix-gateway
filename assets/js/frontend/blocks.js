@@ -13,7 +13,11 @@
     const descriptionText = window.wp.htmlEntities.decodeEntities(
       settings.description || ""
     );
-    const iconUrl = settings.icon || "";
+    const iconUrls = Array.isArray(settings.icons)
+      ? settings.icons.filter(Boolean).slice(0, 3)
+      : settings.icon
+        ? [settings.icon]
+        : [];
 
     const Label = function () {
       const children = [
@@ -26,21 +30,26 @@
         ),
       ];
 
-      if (iconUrl) {
+      iconUrls.forEach(function (iconUrl, index) {
         children.push(
           el("img", {
+            key: "icon-" + index,
             src: iconUrl,
             alt: labelText,
             style: {
               maxHeight: "24px",
-              marginLeft: "8px",
+              marginLeft: index === 0 ? "8px" : "4px",
               verticalAlign: "middle",
             },
           })
         );
-      }
+      });
 
-      return el("span", { style: { display: "inline-flex", alignItems: "center" } }, children);
+      return el(
+        "span",
+        { style: { display: "inline-flex", alignItems: "center" } },
+        children
+      );
     };
 
     const Content = function () {

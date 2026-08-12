@@ -3,27 +3,73 @@
 
   var frame;
   var activeTargetId = "";
+  var maxIcons =
+    (window.wcColibrixGatewayIconSettings &&
+      window.wcColibrixGatewayIconSettings.maxIcons) ||
+    3;
 
-  function updatePreview($input) {
-    var url = $.trim($input.val());
-    var targetId = $input.attr("id");
-    var $preview = $(
-      '.wc-colibrix-gateway-icon-preview[data-preview-for="' + targetId + '"]'
-    );
-    var $clear = $(
-      '.wc-colibrix-gateway-clear-icon[data-target="' + targetId + '"]'
-    );
-
-    if (url) {
-      $preview.attr("src", url).show();
-      $clear.prop("disabled", false);
-    } else {
-      $preview.attr("src", "").hide();
-      $clear.prop("disabled", true);
-    }
+  function getUrls($input) {
+    return $.trim($input.val())
+      .split(/\r\n|\r|\n/)
+      .map(function (url) {
+        return $.trim(url);
+      })
+      .filter(Boolean)
+      .slice(0, maxIcons);
   }
 
-  $(document).on("click", ".wc-colibrix-gateway-upload-icon", function (event) {
+  function setUrls($input, urls) {
+    urls = urls.filter(Boolean).slice(0, maxIcons);
+    $input.val(urls.join("\n")).trigger("change");
+    renderPreview($input);
+  }
+
+  function renderPreview($input) {
+    var targetId = $input.attr("id");
+    var urls = getUrls($input);
+    var $preview = $(
+      '.wc-colibrix-gateway-icons-preview[data-target="' + targetId + '"]'
+    );
+    var $add = $(
+      '.wc-colibrix-gateway-upload-icons[data-target="' + targetId + '"]'
+    );
+    var $clear = $(
+      '.wc-colibrix-gateway-clear-icons[data-target="' + targetId + '"]'
+    );
+    var removeLabel =
+      (window.wcColibrixGatewayIconSettings &&
+        window.wcColibrixGatewayIconSettings.remove) ||
+      "Remove icon";
+
+    $preview.empty();
+    urls.forEach(function (url) {
+      var $chip = $(
+        '<span class="wc-colibrix-gateway-icon-chip" style="display:inline-flex;align-items:center;gap:4px;border:1px solid #c3c4c7;border-radius:4px;padding:4px 6px;background:#fff;"></span>'
+      );
+      $chip.attr("data-url", url);
+      $chip.append(
+        $("<img/>", {
+          src: url,
+          alt: "",
+          css: { maxHeight: "24px" },
+        })
+      );
+      $chip.append(
+        $("<button/>", {
+          type: "button",
+          class: "button-link-delete wc-colibrix-gateway-remove-icon",
+          "aria-label": removeLabel,
+          text: "×",
+        })
+      );
+      $preview.append($chip);
+    });
+
+    $add.prop("disabled", urls.length >= maxIcons);
+    $clear.prop("disabled", urls.length === 0);
+  }
+
+  $(document).on("click", ".wc-colibrix-gateway-upload-icons", function (event) {
     event.preventDefault();
 
     var targetId = $(this).data("target");
@@ -44,14 +90,14 @@
       title:
         (window.wcColibrixGatewayIconSettings &&
           window.wcColibrixGatewayIconSettings.title) ||
-        "Select payment method icon",
+        "Select payment method icons",
       button: {
         text:
           (window.wcColibrixGatewayIconSettings &&
             window.wcColibrixGatewayIconSettings.button) ||
-          "Use this image",
+          "Use selected images",
       },
-      multiple: false,
+      multiple: true,
       library: {
         type: "image",
       },
@@ -59,19 +105,50 @@
 
     frame.on("select", function () {
       var $target = $("#" + activeTargetId);
-      var attachment = frame.state().get("selection").first().toJSON();
-      if (!$target.length || !attachment || !attachment.url) {
+      if (!$target.length) {
         return;
       }
 
-      $target.val(attachment.url).trigger("change");
-      updatePreview($target);
+      var current = getUrls($target);
+      var selected = frame.state().get("selection").toJSON() || [];
+      selected.forEach(function (attachment) {
+        if (
+          attachment &&
+          attachment.url &&
+          current.indexOf(attachment.url) === -1 &&
+          current.length < maxIcons
+        ) {
+          current.push(attachment.url);
+        }
+      });
+      setUrls($target, current);
     });
 
     frame.open();
   });
 
-  $(document).on("click", ".wc-colibrix-gateway-clear-icon", function (event) {
+  $(document).on("click", ".wc-colibrix-gateway-remove-icon", function (event) {
+    event.preventDefault();
+
+    var $chip = $(this).closest(".wc-colibrix-gateway-icon-chip");
+    var $preview = $chip.closest(".wc-colibrix-gateway-icons-preview");
+    var targetId = $preview.data("target");
+    var $input = $("#" + targetId);
+    var removeUrl = $chip.data("url");
+
+    if (!$input.length) {
+      return;
+    }
+
+    setUrls(
+      $input,
+      getUrls($input).filter(function (url) {
+        return url !== removeUrl;
+      })
+    );
+  });
+
+  $(document).on("click", ".wc-colibrix-gateway-clear-icons", function (event) {
     event.preventDefault();
 
     var targetId = $(this).data("target");
@@ -80,15 +157,6 @@
       return;
     }
 
-    $input.val("").trigger("change");
-    updatePreview($input);
+    setUrls($input, []);
   });
-
-  $(document).on(
-    "input change",
-    'input[name^="woocommerce_"][name$="_icon"]',
-    function () {
-      updatePreview($(this));
-    }
-  );
 })(jQuery);
