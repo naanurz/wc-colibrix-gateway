@@ -1,4 +1,4 @@
 <?php return array(
     'dependencies' => array('wc-blocks-registry', 'wc-settings', 'wp-element', 'wp-html-entities'),
-    'version'      => '1.1.0',
+    'version'      => '1.1.1',
 );

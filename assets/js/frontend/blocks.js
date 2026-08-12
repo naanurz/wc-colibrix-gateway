@@ -1,5 +1,6 @@
 (function () {
   const methods = ["colibrix_gateway_card", "colibrix_gateway_apm"];
+  const el = window.wp.element.createElement;
 
   methods.forEach(function (methodName) {
     const settings = window.wc.wcSettings.getSetting(methodName + "_data", {});
@@ -12,20 +13,45 @@
     const descriptionText = window.wp.htmlEntities.decodeEntities(
       settings.description || ""
     );
+    const iconUrl = settings.icon || "";
 
     const Label = function () {
-      return window.wp.element.createElement("span", null, labelText);
+      const children = [
+        el(
+          "span",
+          {
+            className: "wc-block-components-payment-method-label",
+          },
+          labelText
+        ),
+      ];
+
+      if (iconUrl) {
+        children.push(
+          el("img", {
+            src: iconUrl,
+            alt: labelText,
+            style: {
+              maxHeight: "24px",
+              marginLeft: "8px",
+              verticalAlign: "middle",
+            },
+          })
+        );
+      }
+
+      return el("span", { style: { display: "inline-flex", alignItems: "center" } }, children);
     };
 
     const Content = function () {
-      return window.wp.element.createElement("span", null, descriptionText);
+      return el("span", null, descriptionText);
     };
 
     window.wc.wcBlocksRegistry.registerPaymentMethod({
       name: methodName,
-      label: window.wp.element.createElement(Label, null),
-      content: window.wp.element.createElement(Content, null),
-      edit: window.wp.element.createElement(Content, null),
+      label: el(Label, null),
+      content: el(Content, null),
+      edit: el(Content, null),
       canMakePayment: function () {
         return true;
       },

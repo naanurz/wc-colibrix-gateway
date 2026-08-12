@@ -53,9 +53,15 @@ final class WC_Colibrix_Gateway_Blocks_Support extends AbstractPaymentMethodType
         $gateways = WC()->payment_gateways()->payment_gateways();
         $gateway  = $gateways[$this->name] ?? null;
 
+        $icon = '';
+        if ($gateway && ! empty($gateway->icon)) {
+            $icon = esc_url($gateway->icon);
+        }
+
         return [
             'title'       => $gateway ? $gateway->title : __('Colibrix Gateway', 'wc-colibrix-gateway-payment'),
             'description' => $gateway ? $gateway->description : '',
+            'icon'        => $icon,
             'supports'    => $gateway ? array_values($gateway->supports) : ['products'],
         ];
     }

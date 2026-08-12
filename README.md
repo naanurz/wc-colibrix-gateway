@@ -18,6 +18,7 @@ The plugin registers two payment methods:
 - supports refunds via API for the card payment method
 - supports WooCommerce HPOS
 - supports WooCommerce Cart & Checkout Blocks
+- lets merchants customize checkout title, description, and payment method icon
 - writes debug logs for API requests and responses into WooCommerce logs
 
 ## Supported payment methods
@@ -45,6 +46,7 @@ Each payment method has the following settings:
 - `Enable/Disable`
 - `Title`
 - `Description`
+- `Icon` (image URL / Media Library picker shown at checkout)
 - `API Base URL`
 - `Project ID`
 - `API Key`

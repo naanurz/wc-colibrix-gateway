@@ -42,6 +42,7 @@ abstract class WC_Colibrix_Gateway_Abstract extends WC_Payment_Gateway
 
         $this->title             = (string) $this->get_option('title', $this->get_default_checkout_title());
         $this->description       = (string) $this->get_option('description', $this->get_default_checkout_description());
+        $this->icon              = esc_url($this->get_option('icon', ''));
         $this->enabled           = (string) $this->get_option('enabled', 'no');
         $api_base_url            = rtrim(trim((string) $this->get_option('api_base_url', self::DEFAULT_API_BASE)), '/');
         $this->api_base_url      = $api_base_url !== '' ? $api_base_url : self::DEFAULT_API_BASE;
@@ -55,6 +56,7 @@ abstract class WC_Colibrix_Gateway_Abstract extends WC_Payment_Gateway
         add_action('woocommerce_api_' . $this->get_return_api_key(), [$this, 'handle_return']);
         add_action('woocommerce_api_' . $this->get_notify_api_key(), [$this, 'handle_notification']);
         add_action('woocommerce_admin_order_data_after_payment_info', [$this, 'render_admin_payment_info']);
+        add_action('admin_enqueue_scripts', [$this, 'enqueue_admin_assets']);
     }
 
     public function init_form_fields(): void
@@ -78,6 +80,13 @@ abstract class WC_Colibrix_Gateway_Abstract extends WC_Payment_Gateway
                 'type'        => 'textarea',
                 'description' => __('Shown to customers at checkout.', 'wc-colibrix-gateway-payment'),
                 'default'     => $this->get_default_checkout_description(),
+            ],
+            'icon' => [
+                'title'       => __('Icon', 'wc-colibrix-gateway-payment'),
+                'type'        => 'icon',
+                'description' => __('Logo shown next to the title at checkout (for example Visa/Mastercard). Upload via Media Library or paste an image URL. Leave empty for no icon.', 'wc-colibrix-gateway-payment'),
+                'default'     => '',
+                'css'         => 'width: 400px;',
             ],
             'api_base_url' => [
                 'title'       => __('API Base URL', 'wc-colibrix-gateway-payment'),
@@ -117,6 +126,124 @@ abstract class WC_Colibrix_Gateway_Abstract extends WC_Payment_Gateway
                 'description' => __('Log API requests/responses and callbacks.', 'wc-colibrix-gateway-payment'),
             ],
         ];
+    }
+
+    /**
+     * Render an icon setting with Media Library picker and preview.
+     *
+     * @param string $key Field key.
+     * @param array  $data Field config.
+     */
+    public function generate_icon_html(string $key, array $data): string
+    {
+        $field_key = $this->get_field_key($key);
+        $data      = wp_parse_args(
+            $data,
+            [
+                'title'             => '',
+                'disabled'          => false,
+                'class'             => '',
+                'css'               => '',
+                'placeholder'       => '',
+                'desc_tip'          => false,
+                'description'       => '',
+                'custom_attributes' => [],
+            ]
+        );
+        $value = (string) $this->get_option($key, $data['default'] ?? '');
+
+        ob_start();
+        ?>
+        <tr valign="top">
+            <th scope="row" class="titledesc">
+                <label for="<?php echo esc_attr($field_key); ?>"><?php echo wp_kses_post($data['title']); ?></label>
+            </th>
+            <td class="forminp">
+                <fieldset>
+                    <legend class="screen-reader-text"><span><?php echo wp_kses_post($data['title']); ?></span></legend>
+                    <input
+                        class="input-text regular-input <?php echo esc_attr($data['class']); ?>"
+                        type="url"
+                        name="<?php echo esc_attr($field_key); ?>"
+                        id="<?php echo esc_attr($field_key); ?>"
+                        style="<?php echo esc_attr($data['css']); ?>"
+                        value="<?php echo esc_attr($value); ?>"
+                        placeholder="<?php echo esc_attr($data['placeholder']); ?>"
+                    />
+                    <button
+                        type="button"
+                        class="button wc-colibrix-gateway-upload-icon"
+                        data-target="<?php echo esc_attr($field_key); ?>"
+                    >
+                        <?php esc_html_e('Select image', 'wc-colibrix-gateway-payment'); ?>
+                    </button>
+                    <button
+                        type="button"
+                        class="button wc-colibrix-gateway-clear-icon"
+                        data-target="<?php echo esc_attr($field_key); ?>"
+                        <?php disabled($value === ''); ?>
+                    >
+                        <?php esc_html_e('Clear', 'wc-colibrix-gateway-payment'); ?>
+                    </button>
+                    <p class="wc-colibrix-gateway-icon-preview-wrap" style="margin: 8px 0 0;">
+                        <img
+                            src="<?php echo esc_url($value); ?>"
+                            alt=""
+                            class="wc-colibrix-gateway-icon-preview"
+                            data-preview-for="<?php echo esc_attr($field_key); ?>"
+                            style="max-height: 32px;<?php echo $value === '' ? ' display: none;' : ''; ?>"
+                        />
+                    </p>
+                    <?php echo $this->get_description_html($data); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                </fieldset>
+            </td>
+        </tr>
+        <?php
+
+        return (string) ob_get_clean();
+    }
+
+    /**
+     * Sanitize icon URL on save.
+     *
+     * @param string $key Field key.
+     * @param string|null $value Submitted value.
+     */
+    public function validate_icon_field(string $key, $value): string
+    {
+        unset($key);
+
+        return esc_url_raw(trim((string) $value));
+    }
+
+    public function enqueue_admin_assets(string $hook): void
+    {
+        if ($hook !== 'woocommerce_page_wc-settings') {
+            return;
+        }
+
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+        $section = isset($_GET['section']) ? sanitize_text_field(wp_unslash((string) $_GET['section'])) : '';
+        if ($section !== $this->id) {
+            return;
+        }
+
+        wp_enqueue_media();
+        wp_enqueue_script(
+            'wc-colibrix-gateway-icon-settings',
+            WC_COLIBRIX_GATEWAY_PLUGIN_URL . 'assets/js/admin/icon-settings.js',
+            ['jquery'],
+            '1.1.0',
+            true
+        );
+        wp_localize_script(
+            'wc-colibrix-gateway-icon-settings',
+            'wcColibrixGatewayIconSettings',
+            [
+                'title'  => __('Select payment method icon', 'wc-colibrix-gateway-payment'),
+                'button' => __('Use this image', 'wc-colibrix-gateway-payment'),
+            ]
+        );
     }
 
     public function process_payment($order_id): array
