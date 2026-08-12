@@ -23,5 +23,8 @@ pnpm-debug.log*
 # Archives / builds
 *.zip
 
+# Local test environment (Docker)
+local-dev/
+
 # PHP / tests
 .phpunit.result.cache
