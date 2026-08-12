@@ -1,19 +1,32 @@
 .wc-colibrix-gateway-icons-preview {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 8px;
-	align-items: center;
-	margin-bottom: 8px;
+	display: block;
+	overflow: auto;
+	margin: 0 0 8px;
+	padding: 2px 0;
 	min-height: 40px;
 }
 
+.wc-colibrix-gateway-icons-preview::after {
+	content: "";
+	display: table;
+	clear: both;
+}
+
+.wc-colibrix-gateway-icon-chip,
+.wc-colibrix-gateway-icon-chip-placeholder {
+	float: left;
+	box-sizing: border-box;
+	margin: 0 8px 8px 0;
+}
+
 .wc-colibrix-gateway-icon-chip {
-	display: inline-flex;
+	display: flex;
 	align-items: center;
 	gap: 6px;
+	max-width: 140px;
 	border: 1px solid #c3c4c7;
 	border-radius: 4px;
-	padding: 4px 8px;
+	padding: 6px 8px;
 	background: #fff;
 	cursor: grab;
 	user-select: none;
@@ -25,15 +38,16 @@
 }
 
 .wc-colibrix-gateway-icon-chip-placeholder {
-	display: inline-flex;
-	min-width: 72px;
-	min-height: 32px;
+	display: block;
+	width: 96px;
+	height: 36px;
 	border: 1px dashed #c3c4c7;
 	border-radius: 4px;
 	background: #f6f7f7;
 }
 
 .wc-colibrix-gateway-icon-handle {
+	flex: 0 0 auto;
 	color: #8c8f94;
 	font-size: 12px;
 	line-height: 1;
@@ -42,14 +56,35 @@
 
 .wc-colibrix-gateway-icon-chip img {
 	display: block;
-	max-height: 24px;
+	flex: 0 1 auto;
+	height: 24px;
 	width: auto;
+	max-width: 64px;
 	object-fit: contain;
 }
 
 .wc-colibrix-gateway-icon-chip .wc-colibrix-gateway-remove-icon {
-	margin-left: 2px;
-	text-decoration: none;
+	flex: 0 0 auto;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 20px;
+	height: 20px;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	border-radius: 2px;
+	background: transparent;
 	color: #b32d2e;
+	font-size: 16px;
+	line-height: 1;
 	cursor: pointer;
+	text-decoration: none;
+	box-shadow: none;
+}
+
+.wc-colibrix-gateway-icon-chip .wc-colibrix-gateway-remove-icon:hover,
+.wc-colibrix-gateway-icon-chip .wc-colibrix-gateway-remove-icon:focus {
+	background: #f6f7f7;
+	color: #8a2424;
 }

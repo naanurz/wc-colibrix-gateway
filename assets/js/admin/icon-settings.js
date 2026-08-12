@@ -35,7 +35,7 @@
     }
 
     var urls = [];
-    $preview.find(".wc-colibrix-gateway-icon-chip").each(function () {
+    $preview.children(".wc-colibrix-gateway-icon-chip").each(function () {
       var url = $(this).attr("data-url");
       if (url) {
         urls.push(url);
@@ -58,7 +58,17 @@
       cursor: "move",
       tolerance: "pointer",
       placeholder: "wc-colibrix-gateway-icon-chip-placeholder",
+      forcePlaceholderSize: true,
+      opacity: 0.9,
       cancel: "button, a, input, textarea",
+      start: function (event, ui) {
+        ui.placeholder.width(Math.max(ui.item.outerWidth(), 96));
+        ui.placeholder.height(Math.max(ui.item.outerHeight(), 36));
+        ui.item.css("width", ui.item.outerWidth());
+      },
+      stop: function (event, ui) {
+        ui.item.css("width", "");
+      },
       update: function () {
         syncOrderFromPreview($preview);
       },
@@ -86,14 +96,17 @@
         window.wcColibrixGatewayIconSettings.drag) ||
       "Drag to reorder";
 
+    if ($preview.hasClass("ui-sortable")) {
+      $preview.sortable("destroy");
+    }
+
     $preview.empty();
     urls.forEach(function (url) {
-      var $chip = $(
-        '<span class="wc-colibrix-gateway-icon-chip" title="' +
-          dragLabel +
-          '"></span>'
-      );
-      $chip.attr("data-url", url);
+      var $chip = $('<span class="wc-colibrix-gateway-icon-chip"></span>');
+      $chip.attr({
+        "data-url": url,
+        title: dragLabel,
+      });
       $chip.append(
         $("<span/>", {
           class: "wc-colibrix-gateway-icon-handle",
@@ -105,12 +118,13 @@
         $("<img/>", {
           src: url,
           alt: "",
+          draggable: false,
         })
       );
       $chip.append(
         $("<button/>", {
           type: "button",
-          class: "button-link-delete wc-colibrix-gateway-remove-icon",
+          class: "wc-colibrix-gateway-remove-icon",
           "aria-label": removeLabel,
           text: "×",
         })

@@ -277,8 +277,8 @@ abstract class WC_Colibrix_Gateway_Abstract extends WC_Payment_Gateway
                                 title="<?php esc_attr_e('Drag to reorder', 'wc-colibrix-gateway-payment'); ?>"
                             >
                                 <span class="wc-colibrix-gateway-icon-handle" aria-hidden="true">⋮⋮</span>
-                                <img src="<?php echo esc_url($url); ?>" alt="" />
-                                <button type="button" class="button-link-delete wc-colibrix-gateway-remove-icon" aria-label="<?php esc_attr_e('Remove icon', 'wc-colibrix-gateway-payment'); ?>">×</button>
+                                <img src="<?php echo esc_url($url); ?>" alt="" draggable="false" />
+                                <button type="button" class="wc-colibrix-gateway-remove-icon" aria-label="<?php esc_attr_e('Remove icon', 'wc-colibrix-gateway-payment'); ?>">×</button>
                             </span>
                         <?php endforeach; ?>
                     </div>
@@ -342,13 +342,13 @@ abstract class WC_Colibrix_Gateway_Abstract extends WC_Payment_Gateway
             'wc-colibrix-gateway-icon-settings',
             WC_COLIBRIX_GATEWAY_PLUGIN_URL . 'assets/css/admin/icon-settings.css',
             [],
-            '1.3.0'
+            '1.3.1'
         );
         wp_enqueue_script(
             'wc-colibrix-gateway-icon-settings',
             WC_COLIBRIX_GATEWAY_PLUGIN_URL . 'assets/js/admin/icon-settings.js',
             ['jquery', 'jquery-ui-sortable'],
-            '1.3.0',
+            '1.3.1',
             true
         );
         wp_localize_script(
