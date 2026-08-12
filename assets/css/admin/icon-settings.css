@@ -1,0 +1,55 @@
+.wc-colibrix-gateway-icons-preview {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	align-items: center;
+	margin-bottom: 8px;
+	min-height: 40px;
+}
+
+.wc-colibrix-gateway-icon-chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	border: 1px solid #c3c4c7;
+	border-radius: 4px;
+	padding: 4px 8px;
+	background: #fff;
+	cursor: grab;
+	user-select: none;
+}
+
+.wc-colibrix-gateway-icon-chip.ui-sortable-helper {
+	cursor: grabbing;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.wc-colibrix-gateway-icon-chip-placeholder {
+	display: inline-flex;
+	min-width: 72px;
+	min-height: 32px;
+	border: 1px dashed #c3c4c7;
+	border-radius: 4px;
+	background: #f6f7f7;
+}
+
+.wc-colibrix-gateway-icon-handle {
+	color: #8c8f94;
+	font-size: 12px;
+	line-height: 1;
+	letter-spacing: -2px;
+}
+
+.wc-colibrix-gateway-icon-chip img {
+	display: block;
+	max-height: 24px;
+	width: auto;
+	object-fit: contain;
+}
+
+.wc-colibrix-gateway-icon-chip .wc-colibrix-gateway-remove-icon {
+	margin-left: 2px;
+	text-decoration: none;
+	color: #b32d2e;
+	cursor: pointer;
+}

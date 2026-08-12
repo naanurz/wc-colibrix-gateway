@@ -18,10 +18,51 @@
       .slice(0, maxIcons);
   }
 
-  function setUrls($input, urls) {
+  function setUrls($input, urls, options) {
+    options = options || {};
     urls = urls.filter(Boolean).slice(0, maxIcons);
     $input.val(urls.join("\n")).trigger("change");
-    renderPreview($input);
+    if (!options.skipRender) {
+      renderPreview($input);
+    }
+  }
+
+  function syncOrderFromPreview($preview) {
+    var targetId = $preview.data("target");
+    var $input = $("#" + targetId);
+    if (!$input.length) {
+      return;
+    }
+
+    var urls = [];
+    $preview.find(".wc-colibrix-gateway-icon-chip").each(function () {
+      var url = $(this).attr("data-url");
+      if (url) {
+        urls.push(url);
+      }
+    });
+    setUrls($input, urls, { skipRender: true });
+  }
+
+  function initSortable($preview) {
+    if (!$preview.length || typeof $.fn.sortable !== "function") {
+      return;
+    }
+
+    if ($preview.hasClass("ui-sortable")) {
+      $preview.sortable("destroy");
+    }
+
+    $preview.sortable({
+      items: "> .wc-colibrix-gateway-icon-chip",
+      cursor: "move",
+      tolerance: "pointer",
+      placeholder: "wc-colibrix-gateway-icon-chip-placeholder",
+      cancel: "button, a, input, textarea",
+      update: function () {
+        syncOrderFromPreview($preview);
+      },
+    });
   }
 
   function renderPreview($input) {
@@ -40,18 +81,30 @@
       (window.wcColibrixGatewayIconSettings &&
         window.wcColibrixGatewayIconSettings.remove) ||
       "Remove icon";
+    var dragLabel =
+      (window.wcColibrixGatewayIconSettings &&
+        window.wcColibrixGatewayIconSettings.drag) ||
+      "Drag to reorder";
 
     $preview.empty();
     urls.forEach(function (url) {
       var $chip = $(
-        '<span class="wc-colibrix-gateway-icon-chip" style="display:inline-flex;align-items:center;gap:4px;border:1px solid #c3c4c7;border-radius:4px;padding:4px 6px;background:#fff;"></span>'
+        '<span class="wc-colibrix-gateway-icon-chip" title="' +
+          dragLabel +
+          '"></span>'
       );
       $chip.attr("data-url", url);
+      $chip.append(
+        $("<span/>", {
+          class: "wc-colibrix-gateway-icon-handle",
+          "aria-hidden": "true",
+          text: "⋮⋮",
+        })
+      );
       $chip.append(
         $("<img/>", {
           src: url,
           alt: "",
-          css: { maxHeight: "24px" },
         })
       );
       $chip.append(
@@ -67,6 +120,7 @@
 
     $add.prop("disabled", urls.length >= maxIcons);
     $clear.prop("disabled", urls.length === 0);
+    initSortable($preview);
   }
 
   $(document).on("click", ".wc-colibrix-gateway-upload-icons", function (event) {
@@ -129,12 +183,13 @@
 
   $(document).on("click", ".wc-colibrix-gateway-remove-icon", function (event) {
     event.preventDefault();
+    event.stopPropagation();
 
     var $chip = $(this).closest(".wc-colibrix-gateway-icon-chip");
     var $preview = $chip.closest(".wc-colibrix-gateway-icons-preview");
     var targetId = $preview.data("target");
     var $input = $("#" + targetId);
-    var removeUrl = $chip.data("url");
+    var removeUrl = $chip.attr("data-url");
 
     if (!$input.length) {
       return;
@@ -158,5 +213,11 @@
     }
 
     setUrls($input, []);
+  });
+
+  $(function () {
+    $(".wc-colibrix-gateway-icons-input").each(function () {
+      renderPreview($(this));
+    });
   });
 })(jQuery);

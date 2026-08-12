@@ -88,7 +88,7 @@ abstract class WC_Colibrix_Gateway_Abstract extends WC_Payment_Gateway
                 'type'        => 'icons',
                 'description' => sprintf(
                     /* translators: %d: maximum number of icons */
-                    __('Up to %d logos shown next to the title at checkout (for example Visa, Mastercard). The Colibrix brand mark is shown first automatically.', 'wc-colibrix-gateway-payment'),
+                    __('Up to %d logos shown next to the title at checkout (for example Visa, Mastercard). The Colibrix brand mark is shown first automatically. Drag icons to change their order.', 'wc-colibrix-gateway-payment'),
                     $this->get_max_icons()
                 ),
                 'default'     => '',
@@ -269,11 +269,15 @@ abstract class WC_Colibrix_Gateway_Abstract extends WC_Payment_Gateway
                     <div
                         class="wc-colibrix-gateway-icons-preview"
                         data-target="<?php echo esc_attr($field_key); ?>"
-                        style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px;"
                     >
                         <?php foreach ($urls as $url) : ?>
-                            <span class="wc-colibrix-gateway-icon-chip" data-url="<?php echo esc_attr($url); ?>" style="display:inline-flex;align-items:center;gap:4px;border:1px solid #c3c4c7;border-radius:4px;padding:4px 6px;background:#fff;">
-                                <img src="<?php echo esc_url($url); ?>" alt="" style="max-height:24px;" />
+                            <span
+                                class="wc-colibrix-gateway-icon-chip"
+                                data-url="<?php echo esc_attr($url); ?>"
+                                title="<?php esc_attr_e('Drag to reorder', 'wc-colibrix-gateway-payment'); ?>"
+                            >
+                                <span class="wc-colibrix-gateway-icon-handle" aria-hidden="true">⋮⋮</span>
+                                <img src="<?php echo esc_url($url); ?>" alt="" />
                                 <button type="button" class="button-link-delete wc-colibrix-gateway-remove-icon" aria-label="<?php esc_attr_e('Remove icon', 'wc-colibrix-gateway-payment'); ?>">×</button>
                             </span>
                         <?php endforeach; ?>
@@ -334,11 +338,17 @@ abstract class WC_Colibrix_Gateway_Abstract extends WC_Payment_Gateway
         }
 
         wp_enqueue_media();
+        wp_enqueue_style(
+            'wc-colibrix-gateway-icon-settings',
+            WC_COLIBRIX_GATEWAY_PLUGIN_URL . 'assets/css/admin/icon-settings.css',
+            [],
+            '1.3.0'
+        );
         wp_enqueue_script(
             'wc-colibrix-gateway-icon-settings',
             WC_COLIBRIX_GATEWAY_PLUGIN_URL . 'assets/js/admin/icon-settings.js',
-            ['jquery'],
-            '1.2.1',
+            ['jquery', 'jquery-ui-sortable'],
+            '1.3.0',
             true
         );
         wp_localize_script(
@@ -349,6 +359,7 @@ abstract class WC_Colibrix_Gateway_Abstract extends WC_Payment_Gateway
                 'button'   => __('Use selected images', 'wc-colibrix-gateway-payment'),
                 'maxIcons' => $this->get_max_icons(),
                 'remove'   => __('Remove icon', 'wc-colibrix-gateway-payment'),
+                'drag'     => __('Drag to reorder', 'wc-colibrix-gateway-payment'),
             ]
         );
     }

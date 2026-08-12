@@ -47,7 +47,7 @@ Each payment method has the following settings:
 - `Enable/Disable`
 - `Title`
 - `Description`
-- `Icons` (up to 10 image URLs / Media Library picker; Colibrix brand mark is prepended automatically; filterable via `wc_colibrix_gateway_max_icons`)
+- `Icons` (up to 10 image URLs / Media Library picker with drag-and-drop reorder; Colibrix brand mark is prepended automatically; filterable via `wc_colibrix_gateway_max_icons`)
 - `API Base URL`
 - `Project ID`
 - `API Key`
