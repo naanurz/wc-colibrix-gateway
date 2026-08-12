@@ -88,7 +88,7 @@ abstract class WC_Colibrix_Gateway_Abstract extends WC_Payment_Gateway
                 'type'        => 'icons',
                 'description' => sprintf(
                     /* translators: %d: maximum number of icons */
-                    __('Up to %d logos shown next to the title at checkout (for example Visa, Mastercard).', 'wc-colibrix-gateway-payment'),
+                    __('Up to %d logos shown next to the title at checkout (for example Visa, Mastercard). The Colibrix brand mark is shown first automatically.', 'wc-colibrix-gateway-payment'),
                     $this->get_max_icons()
                 ),
                 'default'     => '',
@@ -134,6 +134,18 @@ abstract class WC_Colibrix_Gateway_Abstract extends WC_Payment_Gateway
     }
 
     /**
+     * Official Colibrix brand mark bundled with the plugin.
+     */
+    public function get_plugin_brand_icon_url(): string
+    {
+        return (string) apply_filters(
+            'wc_colibrix_gateway_brand_icon_url',
+            WC_COLIBRIX_GATEWAY_PLUGIN_URL . 'assets/images/colibrix-mark.png',
+            $this->id
+        );
+    }
+
+    /**
      * Maximum number of checkout icons a merchant can configure.
      */
     public function get_max_icons(): int
@@ -144,9 +156,11 @@ abstract class WC_Colibrix_Gateway_Abstract extends WC_Payment_Gateway
     }
 
     /**
+     * Icons configured by the merchant in gateway settings.
+     *
      * @return list<string>
      */
-    public function get_icon_urls(): array
+    public function get_configured_icon_urls(): array
     {
         $raw = (string) $this->get_option('icons', '');
         if ($raw === '') {
@@ -160,6 +174,35 @@ abstract class WC_Colibrix_Gateway_Abstract extends WC_Payment_Gateway
         }, $urls)));
 
         return array_slice($urls, 0, $this->get_max_icons());
+    }
+
+    /**
+     * Icons rendered at checkout: Colibrix brand mark + merchant logos.
+     *
+     * @return list<string>
+     */
+    public function get_icon_urls(): array
+    {
+        $urls  = $this->get_configured_icon_urls();
+        $brand = esc_url_raw($this->get_plugin_brand_icon_url());
+
+        /**
+         * Whether to prepend the bundled Colibrix brand mark at checkout.
+         *
+         * @param bool   $prepend Whether to prepend the brand mark.
+         * @param string $gateway_id Gateway id.
+         */
+        $prepend_brand = (bool) apply_filters('wc_colibrix_gateway_prepend_brand_icon', true, $this->id);
+
+        if ($prepend_brand && $brand !== '' && ! in_array($brand, $urls, true)) {
+            array_unshift($urls, $brand);
+        }
+
+        if ($urls === [] && $brand !== '') {
+            return [$brand];
+        }
+
+        return $urls;
     }
 
     public function get_icon(): string
@@ -203,7 +246,7 @@ abstract class WC_Colibrix_Gateway_Abstract extends WC_Payment_Gateway
                 'custom_attributes' => [],
             ]
         );
-        $urls = $this->get_icon_urls();
+        $urls = $this->get_configured_icon_urls();
         $value = implode("\n", $urls);
         $max_icons = $this->get_max_icons();
 
@@ -295,7 +338,7 @@ abstract class WC_Colibrix_Gateway_Abstract extends WC_Payment_Gateway
             'wc-colibrix-gateway-icon-settings',
             WC_COLIBRIX_GATEWAY_PLUGIN_URL . 'assets/js/admin/icon-settings.js',
             ['jquery'],
-            '1.2.0',
+            '1.2.1',
             true
         );
         wp_localize_script(

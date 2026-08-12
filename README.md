@@ -19,6 +19,7 @@ The plugin registers two payment methods:
 - supports WooCommerce HPOS
 - supports WooCommerce Cart & Checkout Blocks
 - lets merchants customize checkout title, description, and up to 10 payment method icons
+- ships the Colibrix brand mark at checkout (with merchant Visa/Mastercard logos after it)
 - writes debug logs for API requests and responses into WooCommerce logs
 
 ## Supported payment methods
@@ -46,7 +47,7 @@ Each payment method has the following settings:
 - `Enable/Disable`
 - `Title`
 - `Description`
-- `Icons` (up to 10 image URLs / Media Library picker shown at checkout; filterable via `wc_colibrix_gateway_max_icons`)
+- `Icons` (up to 10 image URLs / Media Library picker; Colibrix brand mark is prepended automatically; filterable via `wc_colibrix_gateway_max_icons`)
 - `API Base URL`
 - `Project ID`
 - `API Key`
