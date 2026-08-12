@@ -28,7 +28,9 @@
   function clearDropMarkers($preview) {
     $preview
       .find(".wc-colibrix-gateway-icon-chip")
-      .removeClass("is-drop-before is-drop-after is-dragging");
+      .removeClass(
+        "is-drop-before is-drop-after is-dragging wc-colibrix-gateway-drop-target"
+      );
   }
 
   function reorderUrls(urls, fromUrl, toUrl, placeAfter) {
@@ -45,41 +47,6 @@
     var insertIndex = placeAfter ? toIndex + 1 : toIndex;
     urls.splice(insertIndex, 0, fromUrl);
     return urls;
-  }
-
-  function createChip(url, dragLabel, removeLabel) {
-    var $chip = $(
-      '<span class="wc-colibrix-gateway-icon-chip" role="listitem"></span>'
-    );
-    $chip.attr({
-      "data-url": url,
-      title: dragLabel,
-      draggable: "true",
-    });
-    $chip.append(
-      $("<span/>", {
-        class: "wc-colibrix-gateway-icon-handle",
-        "aria-hidden": "true",
-        text: "⋮⋮",
-      })
-    );
-    $chip.append(
-      $("<span/>", {
-        class: "wc-colibrix-gateway-icon-thumb",
-        "aria-hidden": "true",
-        css: { "background-image": 'url("' + String(url).replace(/"/g, '\\"') + '")' },
-      })
-    );
-    $chip.append(
-      $("<button/>", {
-        type: "button",
-        class: "wc-colibrix-gateway-remove-icon",
-        "aria-label": removeLabel,
-        text: "×",
-        draggable: false,
-      })
-    );
-    return $chip;
   }
 
   function renderPreview($input) {
@@ -105,7 +72,35 @@
 
     $preview.empty();
     urls.forEach(function (url) {
-      $preview.append(createChip(url, dragLabel, removeLabel));
+      var $chip = $('<span class="wc-colibrix-gateway-icon-chip"></span>');
+      $chip.attr({
+        "data-url": url,
+        title: dragLabel,
+        draggable: "true",
+      });
+      $chip.append(
+        $("<span/>", {
+          class: "wc-colibrix-gateway-icon-handle",
+          "aria-hidden": "true",
+          text: "⋮⋮",
+        })
+      );
+      $chip.append(
+        $("<img/>", {
+          src: url,
+          alt: "",
+          draggable: false,
+        })
+      );
+      $chip.append(
+        $("<button/>", {
+          type: "button",
+          class: "wc-colibrix-gateway-remove-icon",
+          "aria-label": removeLabel,
+          text: "×",
+        })
+      );
+      $preview.append($chip);
     });
 
     $add.prop("disabled", urls.length >= maxIcons);
@@ -113,11 +108,6 @@
   }
 
   $(document).on("dragstart", ".wc-colibrix-gateway-icon-chip", function (event) {
-    if ($(event.target).closest(".wc-colibrix-gateway-remove-icon").length) {
-      event.preventDefault();
-      return;
-    }
-
     var $chip = $(this);
     dragUrl = $chip.attr("data-url") || "";
     $chip.addClass("is-dragging");
@@ -125,11 +115,6 @@
     if (event.originalEvent && event.originalEvent.dataTransfer) {
       event.originalEvent.dataTransfer.effectAllowed = "move";
       event.originalEvent.dataTransfer.setData("text/plain", dragUrl);
-      try {
-        event.originalEvent.dataTransfer.setDragImage($chip.get(0), 16, 16);
-      } catch (err) {
-        // Older browsers may not support setDragImage.
-      }
     }
   });
 
@@ -159,8 +144,10 @@
     var placeAfter = clientX > bounds.left + bounds.width / 2;
 
     clearDropMarkers($preview);
-    $target.addClass(placeAfter ? "is-drop-after" : "is-drop-before");
-    $preview.find('[data-url="' + dragUrl.replace(/"/g, '\\"') + '"]').addClass("is-dragging");
+    $target
+      .addClass("wc-colibrix-gateway-drop-target")
+      .addClass(placeAfter ? "is-drop-after" : "is-drop-before");
+    $preview.find('[data-url="' + dragUrl + '"]').addClass("is-dragging");
 
     if (event.originalEvent && event.originalEvent.dataTransfer) {
       event.originalEvent.dataTransfer.dropEffect = "move";
@@ -281,10 +268,6 @@
         return url !== removeUrl;
       })
     );
-  });
-
-  $(document).on("mousedown", ".wc-colibrix-gateway-remove-icon", function (event) {
-    event.stopPropagation();
   });
 
   $(document).on("click", ".wc-colibrix-gateway-clear-icons", function (event) {

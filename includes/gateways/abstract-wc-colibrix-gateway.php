@@ -275,16 +275,10 @@ abstract class WC_Colibrix_Gateway_Abstract extends WC_Payment_Gateway
                                 class="wc-colibrix-gateway-icon-chip"
                                 data-url="<?php echo esc_attr($url); ?>"
                                 title="<?php esc_attr_e('Drag to reorder', 'wc-colibrix-gateway-payment'); ?>"
-                                draggable="true"
-                                role="listitem"
                             >
                                 <span class="wc-colibrix-gateway-icon-handle" aria-hidden="true">⋮⋮</span>
-                                <span
-                                    class="wc-colibrix-gateway-icon-thumb"
-                                    aria-hidden="true"
-                                    style="background-image: url('<?php echo esc_url($url); ?>');"
-                                ></span>
-                                <button type="button" class="wc-colibrix-gateway-remove-icon" draggable="false" aria-label="<?php esc_attr_e('Remove icon', 'wc-colibrix-gateway-payment'); ?>">×</button>
+                                <img src="<?php echo esc_url($url); ?>" alt="" draggable="false" />
+                                <button type="button" class="wc-colibrix-gateway-remove-icon" aria-label="<?php esc_attr_e('Remove icon', 'wc-colibrix-gateway-payment'); ?>">×</button>
                             </span>
                         <?php endforeach; ?>
                     </div>
@@ -348,13 +342,13 @@ abstract class WC_Colibrix_Gateway_Abstract extends WC_Payment_Gateway
             'wc-colibrix-gateway-icon-settings',
             WC_COLIBRIX_GATEWAY_PLUGIN_URL . 'assets/css/admin/icon-settings.css',
             [],
-            '1.3.3'
+            '1.3.2'
         );
         wp_enqueue_script(
             'wc-colibrix-gateway-icon-settings',
             WC_COLIBRIX_GATEWAY_PLUGIN_URL . 'assets/js/admin/icon-settings.js',
             ['jquery'],
-            '1.3.3',
+            '1.3.2',
             true
         );
         wp_localize_script(

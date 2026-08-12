@@ -14,16 +14,13 @@
 	align-items: center;
 	gap: 6px;
 	box-sizing: border-box;
-	width: auto;
-	max-width: 148px;
-	overflow: hidden;
+	max-width: 140px;
 	border: 1px solid #c3c4c7;
 	border-radius: 4px;
 	padding: 6px 8px;
 	background: #fff;
 	cursor: grab;
 	user-select: none;
-	-webkit-user-drag: element;
 }
 
 .wc-colibrix-gateway-icon-chip.is-dragging {
@@ -39,8 +36,6 @@
 	width: 3px;
 	border-radius: 2px;
 	background: #2271b1;
-	pointer-events: none;
-	z-index: 2;
 }
 
 .wc-colibrix-gateway-icon-chip.is-drop-before::before {
@@ -51,29 +46,23 @@
 	right: -6px;
 }
 
-.wc-colibrix-gateway-icon-handle,
-.wc-colibrix-gateway-icon-thumb {
-	pointer-events: none;
-	-webkit-user-drag: none;
-	user-select: none;
-}
-
 .wc-colibrix-gateway-icon-handle {
 	flex: 0 0 auto;
 	color: #8c8f94;
 	font-size: 12px;
 	line-height: 1;
 	letter-spacing: -2px;
+	pointer-events: none;
 }
 
-.wc-colibrix-gateway-icon-thumb {
+.wc-colibrix-gateway-icon-chip img {
 	display: block;
-	flex: 0 0 auto;
-	width: 56px;
+	flex: 0 1 auto;
 	height: 24px;
-	background-position: center;
-	background-repeat: no-repeat;
-	background-size: contain;
+	width: auto;
+	max-width: 64px;
+	object-fit: contain;
+	pointer-events: none;
 }
 
 .wc-colibrix-gateway-icon-chip .wc-colibrix-gateway-remove-icon {
@@ -94,7 +83,6 @@
 	cursor: pointer;
 	text-decoration: none;
 	box-shadow: none;
-	-webkit-user-drag: none;
 }
 
 .wc-colibrix-gateway-icon-chip .wc-colibrix-gateway-remove-icon:hover,
