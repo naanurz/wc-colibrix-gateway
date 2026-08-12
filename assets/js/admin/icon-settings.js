@@ -3,6 +3,7 @@
 
   var frame;
   var activeTargetId = "";
+  var dragUrl = "";
   var maxIcons =
     (window.wcColibrixGatewayIconSettings &&
       window.wcColibrixGatewayIconSettings.maxIcons) ||
@@ -18,61 +19,34 @@
       .slice(0, maxIcons);
   }
 
-  function setUrls($input, urls, options) {
-    options = options || {};
+  function setUrls($input, urls) {
     urls = urls.filter(Boolean).slice(0, maxIcons);
     $input.val(urls.join("\n")).trigger("change");
-    if (!options.skipRender) {
-      renderPreview($input);
-    }
+    renderPreview($input);
   }
 
-  function syncOrderFromPreview($preview) {
-    var targetId = $preview.data("target");
-    var $input = $("#" + targetId);
-    if (!$input.length) {
-      return;
-    }
-
-    var urls = [];
-    $preview.children(".wc-colibrix-gateway-icon-chip").each(function () {
-      var url = $(this).attr("data-url");
-      if (url) {
-        urls.push(url);
-      }
-    });
-    setUrls($input, urls, { skipRender: true });
+  function clearDropMarkers($preview) {
+    $preview
+      .find(".wc-colibrix-gateway-icon-chip")
+      .removeClass(
+        "is-drop-before is-drop-after is-dragging wc-colibrix-gateway-drop-target"
+      );
   }
 
-  function initSortable($preview) {
-    if (!$preview.length || typeof $.fn.sortable !== "function") {
-      return;
+  function reorderUrls(urls, fromUrl, toUrl, placeAfter) {
+    var fromIndex = urls.indexOf(fromUrl);
+    var toIndex = urls.indexOf(toUrl);
+
+    if (fromIndex < 0 || toIndex < 0 || fromUrl === toUrl) {
+      return urls;
     }
 
-    if ($preview.hasClass("ui-sortable")) {
-      $preview.sortable("destroy");
-    }
-
-    $preview.sortable({
-      items: "> .wc-colibrix-gateway-icon-chip",
-      cursor: "move",
-      tolerance: "pointer",
-      placeholder: "wc-colibrix-gateway-icon-chip-placeholder",
-      forcePlaceholderSize: true,
-      opacity: 0.9,
-      cancel: "button, a, input, textarea",
-      start: function (event, ui) {
-        ui.placeholder.width(Math.max(ui.item.outerWidth(), 96));
-        ui.placeholder.height(Math.max(ui.item.outerHeight(), 36));
-        ui.item.css("width", ui.item.outerWidth());
-      },
-      stop: function (event, ui) {
-        ui.item.css("width", "");
-      },
-      update: function () {
-        syncOrderFromPreview($preview);
-      },
-    });
+    urls = urls.slice();
+    urls.splice(fromIndex, 1);
+    toIndex = urls.indexOf(toUrl);
+    var insertIndex = placeAfter ? toIndex + 1 : toIndex;
+    urls.splice(insertIndex, 0, fromUrl);
+    return urls;
   }
 
   function renderPreview($input) {
@@ -96,16 +70,13 @@
         window.wcColibrixGatewayIconSettings.drag) ||
       "Drag to reorder";
 
-    if ($preview.hasClass("ui-sortable")) {
-      $preview.sortable("destroy");
-    }
-
     $preview.empty();
     urls.forEach(function (url) {
       var $chip = $('<span class="wc-colibrix-gateway-icon-chip"></span>');
       $chip.attr({
         "data-url": url,
         title: dragLabel,
+        draggable: "true",
       });
       $chip.append(
         $("<span/>", {
@@ -134,8 +105,90 @@
 
     $add.prop("disabled", urls.length >= maxIcons);
     $clear.prop("disabled", urls.length === 0);
-    initSortable($preview);
   }
+
+  $(document).on("dragstart", ".wc-colibrix-gateway-icon-chip", function (event) {
+    var $chip = $(this);
+    dragUrl = $chip.attr("data-url") || "";
+    $chip.addClass("is-dragging");
+
+    if (event.originalEvent && event.originalEvent.dataTransfer) {
+      event.originalEvent.dataTransfer.effectAllowed = "move";
+      event.originalEvent.dataTransfer.setData("text/plain", dragUrl);
+    }
+  });
+
+  $(document).on("dragend", ".wc-colibrix-gateway-icon-chip", function () {
+    var $preview = $(this).closest(".wc-colibrix-gateway-icons-preview");
+    clearDropMarkers($preview);
+    dragUrl = "";
+  });
+
+  $(document).on("dragover", ".wc-colibrix-gateway-icon-chip", function (event) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    var $target = $(this);
+    var targetUrl = $target.attr("data-url") || "";
+    var $preview = $target.closest(".wc-colibrix-gateway-icons-preview");
+
+    if (!dragUrl || !targetUrl || dragUrl === targetUrl) {
+      return;
+    }
+
+    var bounds = this.getBoundingClientRect();
+    var clientX =
+      event.originalEvent && typeof event.originalEvent.clientX === "number"
+        ? event.originalEvent.clientX
+        : bounds.left;
+    var placeAfter = clientX > bounds.left + bounds.width / 2;
+
+    clearDropMarkers($preview);
+    $target
+      .addClass("wc-colibrix-gateway-drop-target")
+      .addClass(placeAfter ? "is-drop-after" : "is-drop-before");
+    $preview.find('[data-url="' + dragUrl + '"]').addClass("is-dragging");
+
+    if (event.originalEvent && event.originalEvent.dataTransfer) {
+      event.originalEvent.dataTransfer.dropEffect = "move";
+    }
+  });
+
+  $(document).on("dragover", ".wc-colibrix-gateway-icons-preview", function (event) {
+    event.preventDefault();
+  });
+
+  $(document).on("drop", ".wc-colibrix-gateway-icon-chip", function (event) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    var $target = $(this);
+    var targetUrl = $target.attr("data-url") || "";
+    var $preview = $target.closest(".wc-colibrix-gateway-icons-preview");
+    var targetId = $preview.data("target");
+    var $input = $("#" + targetId);
+    var bounds = this.getBoundingClientRect();
+    var clientX =
+      event.originalEvent && typeof event.originalEvent.clientX === "number"
+        ? event.originalEvent.clientX
+        : bounds.left;
+    var placeAfter = clientX > bounds.left + bounds.width / 2;
+    var fromUrl =
+      dragUrl ||
+      (event.originalEvent &&
+        event.originalEvent.dataTransfer &&
+        event.originalEvent.dataTransfer.getData("text/plain")) ||
+      "";
+
+    clearDropMarkers($preview);
+    dragUrl = "";
+
+    if (!$input.length || !fromUrl || !targetUrl || fromUrl === targetUrl) {
+      return;
+    }
+
+    setUrls($input, reorderUrls(getUrls($input), fromUrl, targetUrl, placeAfter));
+  });
 
   $(document).on("click", ".wc-colibrix-gateway-upload-icons", function (event) {
     event.preventDefault();

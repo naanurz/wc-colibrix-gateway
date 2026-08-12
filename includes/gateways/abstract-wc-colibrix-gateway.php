@@ -342,13 +342,13 @@ abstract class WC_Colibrix_Gateway_Abstract extends WC_Payment_Gateway
             'wc-colibrix-gateway-icon-settings',
             WC_COLIBRIX_GATEWAY_PLUGIN_URL . 'assets/css/admin/icon-settings.css',
             [],
-            '1.3.1'
+            '1.3.2'
         );
         wp_enqueue_script(
             'wc-colibrix-gateway-icon-settings',
             WC_COLIBRIX_GATEWAY_PLUGIN_URL . 'assets/js/admin/icon-settings.js',
-            ['jquery', 'jquery-ui-sortable'],
-            '1.3.1',
+            ['jquery'],
+            '1.3.2',
             true
         );
         wp_localize_script(

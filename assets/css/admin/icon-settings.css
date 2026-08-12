@@ -1,28 +1,19 @@
 .wc-colibrix-gateway-icons-preview {
-	display: block;
-	overflow: auto;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px;
 	margin: 0 0 8px;
-	padding: 2px 0;
+	padding: 4px 0;
 	min-height: 40px;
 }
 
-.wc-colibrix-gateway-icons-preview::after {
-	content: "";
-	display: table;
-	clear: both;
-}
-
-.wc-colibrix-gateway-icon-chip,
-.wc-colibrix-gateway-icon-chip-placeholder {
-	float: left;
-	box-sizing: border-box;
-	margin: 0 8px 8px 0;
-}
-
 .wc-colibrix-gateway-icon-chip {
-	display: flex;
+	position: relative;
+	display: inline-flex;
 	align-items: center;
 	gap: 6px;
+	box-sizing: border-box;
 	max-width: 140px;
 	border: 1px solid #c3c4c7;
 	border-radius: 4px;
@@ -32,18 +23,27 @@
 	user-select: none;
 }
 
-.wc-colibrix-gateway-icon-chip.ui-sortable-helper {
-	cursor: grabbing;
-	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+.wc-colibrix-gateway-icon-chip.is-dragging {
+	opacity: 0.45;
 }
 
-.wc-colibrix-gateway-icon-chip-placeholder {
-	display: block;
-	width: 96px;
-	height: 36px;
-	border: 1px dashed #c3c4c7;
-	border-radius: 4px;
-	background: #f6f7f7;
+.wc-colibrix-gateway-icon-chip.is-drop-before::before,
+.wc-colibrix-gateway-icon-chip.is-drop-after::after {
+	content: "";
+	position: absolute;
+	top: 2px;
+	bottom: 2px;
+	width: 3px;
+	border-radius: 2px;
+	background: #2271b1;
+}
+
+.wc-colibrix-gateway-icon-chip.is-drop-before::before {
+	left: -6px;
+}
+
+.wc-colibrix-gateway-icon-chip.is-drop-after::after {
+	right: -6px;
 }
 
 .wc-colibrix-gateway-icon-handle {
@@ -52,6 +52,7 @@
 	font-size: 12px;
 	line-height: 1;
 	letter-spacing: -2px;
+	pointer-events: none;
 }
 
 .wc-colibrix-gateway-icon-chip img {
@@ -61,6 +62,7 @@
 	width: auto;
 	max-width: 64px;
 	object-fit: contain;
+	pointer-events: none;
 }
 
 .wc-colibrix-gateway-icon-chip .wc-colibrix-gateway-remove-icon {
