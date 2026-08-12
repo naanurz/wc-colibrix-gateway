@@ -1,0 +1,30 @@
+.wc-colibrix-gateway-icons {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	margin-left: 8px;
+	vertical-align: middle;
+	line-height: 1;
+}
+
+.wc-colibrix-gateway-icons img,
+.wc-colibrix-gateway-icon,
+.wc-block-components-radio-control-accordion-option img.wc-colibrix-gateway-icon,
+.wc-block-components-payment-method-label + img.wc-colibrix-gateway-icon,
+img.wc-colibrix-gateway-icon {
+	height: 24px !important;
+	width: auto !important;
+	max-width: 40px !important;
+	object-fit: contain !important;
+	display: block;
+	margin: 0 !important;
+	vertical-align: middle;
+}
+
+/* Keep icons aligned with the payment method title in Blocks checkout. */
+.wc-colibrix-gateway-icons-label {
+	display: inline-flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 6px;
+}

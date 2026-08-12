@@ -34,8 +34,16 @@ final class WC_Colibrix_Gateway_Blocks_Support extends AbstractPaymentMethodType
             ? require $asset
             : [
                 'dependencies' => ['wc-blocks-registry', 'wc-settings', 'wp-element', 'wp-html-entities'],
-                'version'      => '1.1.0',
+                'version'      => '1.2.1',
             ];
+
+        wp_register_style(
+            'wc-colibrix-gateway-icons',
+            plugins_url('assets/css/frontend/payment-icons.css', WC_COLIBRIX_GATEWAY_PLUGIN_FILE),
+            [],
+            '1.2.1'
+        );
+        wp_enqueue_style('wc-colibrix-gateway-icons');
 
         wp_register_script(
             $handle,

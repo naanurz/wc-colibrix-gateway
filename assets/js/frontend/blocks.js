@@ -30,24 +30,26 @@
         ),
       ];
 
-      iconUrls.forEach(function (iconUrl, index) {
+      if (iconUrls.length) {
         children.push(
-          el("img", {
-            key: "icon-" + index,
-            src: iconUrl,
-            alt: labelText,
-            style: {
-              maxHeight: "24px",
-              marginLeft: index === 0 ? "8px" : "4px",
-              verticalAlign: "middle",
-            },
-          })
+          el(
+            "span",
+            { className: "wc-colibrix-gateway-icons", key: "icons" },
+            iconUrls.map(function (iconUrl, index) {
+              return el("img", {
+                key: "icon-" + index,
+                className: "wc-colibrix-gateway-icon",
+                src: iconUrl,
+                alt: labelText,
+              });
+            })
+          )
         );
-      });
+      }
 
       return el(
         "span",
-        { style: { display: "inline-flex", alignItems: "center" } },
+        { className: "wc-colibrix-gateway-icons-label" },
         children
       );
     };

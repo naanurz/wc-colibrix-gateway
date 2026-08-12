@@ -58,6 +58,7 @@ abstract class WC_Colibrix_Gateway_Abstract extends WC_Payment_Gateway
         add_action('woocommerce_api_' . $this->get_notify_api_key(), [$this, 'handle_notification']);
         add_action('woocommerce_admin_order_data_after_payment_info', [$this, 'render_admin_payment_info']);
         add_action('admin_enqueue_scripts', [$this, 'enqueue_admin_assets']);
+        add_action('wp_enqueue_scripts', [$this, 'enqueue_frontend_assets']);
     }
 
     public function init_form_fields(): void
@@ -163,13 +164,19 @@ abstract class WC_Colibrix_Gateway_Abstract extends WC_Payment_Gateway
 
     public function get_icon(): string
     {
-        $urls  = $this->get_icon_urls();
+        $urls = $this->get_icon_urls();
+        if ($urls === []) {
+            return apply_filters('woocommerce_gateway_icon', '', $this->id);
+        }
+
         $title = esc_attr($this->get_title());
-        $html  = '';
+        $html  = '<span class="wc-colibrix-gateway-icons">';
 
         foreach ($urls as $url) {
-            $html .= '<img src="' . esc_url($url) . '" alt="' . $title . '" style="max-height:24px;margin-left:4px;vertical-align:middle;" />';
+            $html .= '<img src="' . esc_url($url) . '" alt="' . $title . '" class="wc-colibrix-gateway-icon" />';
         }
+
+        $html .= '</span>';
 
         return apply_filters('woocommerce_gateway_icon', $html, $this->id);
     }
@@ -300,6 +307,25 @@ abstract class WC_Colibrix_Gateway_Abstract extends WC_Payment_Gateway
                 'maxIcons' => $this->get_max_icons(),
                 'remove'   => __('Remove icon', 'wc-colibrix-gateway-payment'),
             ]
+        );
+    }
+
+    public function enqueue_frontend_assets(): void
+    {
+        if (is_admin()) {
+            return;
+        }
+
+        $load = is_checkout() || is_cart() || has_block('woocommerce/checkout') || has_block('woocommerce/cart');
+        if (! $load) {
+            return;
+        }
+
+        wp_enqueue_style(
+            'wc-colibrix-gateway-icons',
+            WC_COLIBRIX_GATEWAY_PLUGIN_URL . 'assets/css/frontend/payment-icons.css',
+            [],
+            '1.2.1'
         );
     }
 
