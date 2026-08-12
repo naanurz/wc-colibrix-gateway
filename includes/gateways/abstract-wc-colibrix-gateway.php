@@ -88,7 +88,7 @@ abstract class WC_Colibrix_Gateway_Abstract extends WC_Payment_Gateway
                 'type'        => 'icons',
                 'description' => sprintf(
                     /* translators: %d: maximum number of icons */
-                    __('Up to %d logos shown next to the title at checkout (for example Visa, Mastercard, Amex).', 'wc-colibrix-gateway-payment'),
+                    __('Up to %d logos shown next to the title at checkout (for example Visa, Mastercard).', 'wc-colibrix-gateway-payment'),
                     $this->get_max_icons()
                 ),
                 'default'     => '',
