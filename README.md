@@ -19,7 +19,7 @@ The plugin registers two payment methods:
 - supports WooCommerce HPOS
 - supports WooCommerce Cart & Checkout Blocks
 - lets merchants customize checkout title, description, and up to 10 payment method icons
-- ships the Colibrix brand mark at checkout (with merchant Visa/Mastercard logos after it)
+- ships the Colibrix brand mark as the admin Payments Providers icon, and prepends it at checkout before merchant logos
 - writes debug logs for API requests and responses into WooCommerce logs
 
 ## Supported payment methods

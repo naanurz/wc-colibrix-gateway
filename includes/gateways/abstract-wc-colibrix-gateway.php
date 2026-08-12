@@ -42,8 +42,8 @@ abstract class WC_Colibrix_Gateway_Abstract extends WC_Payment_Gateway
 
         $this->title             = (string) $this->get_option('title', $this->get_default_checkout_title());
         $this->description       = (string) $this->get_option('description', $this->get_default_checkout_description());
-        $icon_urls               = $this->get_icon_urls();
-        $this->icon              = $icon_urls[0] ?? '';
+        // Admin Payments Providers list expects a square image URL (not checkout HTML).
+        $this->icon              = esc_url($this->get_plugin_brand_icon_url());
         $this->enabled           = (string) $this->get_option('enabled', 'no');
         $api_base_url            = rtrim(trim((string) $this->get_option('api_base_url', self::DEFAULT_API_BASE)), '/');
         $this->api_base_url      = $api_base_url !== '' ? $api_base_url : self::DEFAULT_API_BASE;
